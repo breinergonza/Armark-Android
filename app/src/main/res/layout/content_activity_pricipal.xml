@@ -12,8 +12,4 @@
     tools:context="com.didelab.armk.armarkandroid.ActivityPricipal"
     tools:showIn="@layout/app_bar_activity_pricipal">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
 </RelativeLayout>
