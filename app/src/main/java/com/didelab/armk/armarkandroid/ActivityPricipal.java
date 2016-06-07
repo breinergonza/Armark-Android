@@ -12,6 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.content.Intent;
+import android.net.Uri;
 
 public class ActivityPricipal extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -80,18 +82,39 @@ public class ActivityPricipal extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+        if (id == R.id.nav_productos) {
+            Intent i = new Intent(this, Productos.class);
+            startActivity(i);
+        } else if (id == R.id.nav_almacenes) {
+            Intent i = new Intent(this, Almacenes.class);
+            startActivity(i);
+        } else if (id == R.id.nav_llegar) {
+            Intent i = new Intent(this, Llegar.class);
+            startActivity(i);
+        } else if(id== R.id.nav_navegar){
+            Intent i = new Intent(this, Navegar.class);
+            startActivity(i);
+        } else if(id== R.id.nav_pagina){
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("http://armark.azurewebsites.net/"));
+            this.startActivity(intent);
+        } else if (id == R.id.nav_facebook) {
+            Intent i = new Intent(this, Facebook.class);
+            startActivity(i);
+        } else if (id == R.id.nav_twitter) {
+            Intent i = new Intent(this, Twitter.class);
+            startActivity(i);
+        } else if (id == R.id.nav_youtube) {
+            Intent i = new Intent(this, Youtube.class);
+            startActivity(i);
+        } else if(id == R.id.nav_llamada){
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse("tel:3116520574"));
+            this.startActivity(intent);
+        }else if(id == R.id.nav_propiedades){
+            Intent intent = new Intent(Intent.ACTION_DIAL);
+            intent.setData(Uri.parse("tel:3116520574"));
+            this.startActivity(intent);
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

@@ -3,33 +3,65 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:id="@+id/nav_productos"
+            android:icon="@drawable/ic_productos"
+            android:title="Productos" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:id="@+id/nav_almacenes"
+            android:icon="@drawable/store1"
+            android:title="Almacenes" />
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
+            android:id="@+id/nav_llegar"
+            android:icon="@drawable/ic_llegar"
+            android:title="llegar" />
+
         <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:id="@+id/nav_navegar"
+            android:icon="@drawable/ic_navegar"
+            android:title="Navegar" />
+
+        <item
+            android:id="@+id/nav_pagina"
+            android:icon="@drawable/browser"
+            android:title="Pagina" />
+
     </group>
 
-    <item android:title="Communicate">
+    <item android:title="Social">
         <menu>
             <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:id="@+id/nav_facebook"
+                android:icon="@drawable/facebook"
+                android:title="Facebook" />
+
             <item
-                android:id="@+id/nav_send"
+                android:id="@+id/nav_twitter"
+                android:icon="@drawable/twitter"
+                android:title="Twitter" />
+
+            <item
+                android:id="@+id/nav_youtube"
+                android:icon="@drawable/youtube"
+                android:title="Youtube" />
+
+        </menu>
+    </item>
+
+    <item android:title="Propiedades">
+        <menu>
+            <item
+                android:id="@+id/nav_contactanos"
                 android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
+                android:title="Contactanos" />
+
+            <item
+                android:id="@+id/nav_llamada"
+                android:icon="@drawable/ic_llamar"
+                android:title="Llamar" />
+            <item
+                android:id="@+id/nav_propiedades"
+                android:icon="@drawable/ic_menu_manage"
+                android:title="Propiedades" />
         </menu>
     </item>
 
