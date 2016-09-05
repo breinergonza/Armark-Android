@@ -8,4 +8,18 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="app_bar_height">180dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+    <!-- Lista almacenes -->
+    <dimen name="lista_almacenes_nombre_textsize">17sp</dimen>
+    <dimen name="lista_almacenes_desc1_textsize">14sp</dimen>
+    <dimen name="lista_almacenes_desc2_textsize">16sp</dimen>
+
+    <!-- Lista promociones -->
+    <dimen name="lista_promociones_nombre_textsize">17sp</dimen>
+    <dimen name="lista_promociones_desc1_textsize">14sp</dimen>
+    <dimen name="lista_promociones_desc2_textsize">25sp</dimen>
+
+    <!-- Lista productos -->
+    <dimen name="lista_productos_nombre_textsize">16sp</dimen>
+
 </resources>

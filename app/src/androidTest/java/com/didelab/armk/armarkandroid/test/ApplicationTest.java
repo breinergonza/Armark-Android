@@ -1,4 +1,4 @@
-package com.didelab.armk.armarkandroid;
+package com.didelab.armk.armarkandroid.test;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="#ffffff"
+	android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/imv_lista_almacenes_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="15dp"
+        android:layout_weight="1"
+        android:src="@android:drawable/ic_menu_gallery"
+		android:minWidth="100dp" />
+
+    <LinearLayout
+		android:id="@+id/lly_lista_almacenes_informacion"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="center_vertical"
+		android:layout_weight="3"
+		android:longClickable="true"
+		android:orientation="vertical"
+		android:paddingBottom="10dp"
+		android:paddingLeft="10dp"
+		android:paddingRight="10dp"
+		android:paddingTop="10dp" >
+
+		<TextView
+			android:id="@+id/txt_lista_almacenes_nombre"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Nombre almacen"
+			android:textColor="@android:color/black"
+			android:textSize="@dimen/lista_almacenes_nombre_textsize"
+			android:textStyle="bold" />
+
+		<TextView
+			android:id="@+id/txt_lista_almacenes_descripcion1"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:text="Descripcion 1"
+			android:textColor="#ff000000"
+			android:textSize="@dimen/lista_almacenes_desc1_textsize"/>
+
+		<TextView
+			android:id="@+id/txt_lista_almacenes_descripcion2"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center_vertical"
+			android:text="Descripción 2"
+			android:textColor="#ff000000"
+			android:textSize="@dimen/lista_almacenes_desc2_textsize" />
+	</LinearLayout>
+
+    <ImageView
+        android:id="@+id/imv_lista_almacenes_promocion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginRight="15dp"
+        android:layout_weight="1"
+        android:src="@android:drawable/btn_star_big_on" />
+
+</LinearLayout>

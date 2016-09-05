@@ -1,23 +1,41 @@
 <resources>
-    <string name="app_name">Armark</string>
+    <string name="app_name">ARMARK</string>
+
+
+    <!-- Login -->
+    <string name="facebook_app_id">601499710010721</string>
+    <string name="tag_login_correo">Correo</string>
+    <string name="tag_login_contrasena">Contraseña</string>
+    <string name="tag_login_entrar">Entrar</string>
+
+
 
     <string name="navigation_drawer_open">Abrir panel de navegación</string>
     <string name="navigation_drawer_close">Cerrar panel de navegación</string>
 
+    <!-- Menú -->
     <string name="action_settings">Propiedades</string>
-    <string name="title_activity_activity_login">Login</string>
+    <string name="action_cerrar">Cerrar sesión</string>
+    <string name="action_buscar">Buscar</string>
 
-    <!-- Strings related to login -->
+
+    <string name="title_activity_login">Armark</string>
+
+
+    <!-- Strings relacionados al login -->
     <string name="prompt_email">Correo</string>
     <string name="prompt_password">Contraseña (opcional)</string>
     <string name="action_sign_in">Iniciar o Registrarse</string>
-    <string name="action_sign_in_short">Registrarse</string>
+    <string name="action_sign_in_short">Entrar</string>
     <string name="error_invalid_email">Este es un correo invalido</string>
     <string name="error_invalid_password">La contraseña es demasiado corta</string>
     <string name="error_incorrect_password">La contraseña es incorrecta</string>
     <string name="error_field_required">Este campo es requerido</string>
-    <string name="permission_rationale">"Se necesitan permisos."
-    </string>
+    <string name="permission_rationale">Se necesitan permisos</string>
+
+
+
+
     <string name="title_activity_productos">Productos</string>
     <string name="large_text">
         "Esto es un texto de referencia"
@@ -25,10 +43,14 @@
     <string name="title_activity_almacenes">Almacenes</string>
     <string name="title_activity_navegar">Navegar</string>
     <string name="title_activity_propiedades">Propiedades</string>
+    <string name="title_activity_cerrar_sesion">Cerrar sesión</string>
 
     <string name="correo_info">armark@didelab.com</string>
     <string name="title_activity_llegar">Como Llegar</string>
     <string name="title_activity_facebook">Facebook</string>
     <string name="title_activity_twitter">Twitter</string>
     <string name="title_activity_youtube">Youtube</string>
+    <string name="imv_login_logo">Logo</string>
+    <string name="tag_login_recordar_contrasena">Recordar contraseña</string>
+    <string name="tag_login_registrarse">Registrarse</string>
 </resources>

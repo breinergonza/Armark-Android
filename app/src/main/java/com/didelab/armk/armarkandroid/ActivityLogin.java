@@ -3,75 +3,128 @@ package com.didelab.armk.armarkandroid;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
+import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.TypefaceSpan;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.didelab.armk.armarkandroid.util.ArmarkTypefaceSpan;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.Profile;
+import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
-import static android.Manifest.permission.READ_CONTACTS;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 
 /**
  * A login screen that offers login via email/password.
  */
-public class ActivityLogin extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class ActivityLogin extends AppCompatActivity {
 
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
+    //Id to identity READ_CONTACTS permission request.
     private static final int REQUEST_READ_CONTACTS = 0;
 
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
+    private final String TAG = getClass().getSimpleName();
+    private final String URL_WEB_API_USUARIOS = "http://wsarmark.azurewebsites.net/Api/Usuarios";
 
     // UI references.
-    private AutoCompleteTextView mEmailView;
-    private EditText mPasswordView;
+    private AutoCompleteTextView edtLoginCorreo;
+    private EditText edtLoginContrasena;
     private View mProgressView;
     private View mLoginFormView;
+
+    private Context context;
+    private SharedPreferences prefs;
+
+    // Keep track of the login task to ensure we can cancel it if requested.
+    private UserLoginTask mAuthTask = null;
+
+    // Facebook
+    private LoginButton btnLoginFacebook;
+    private CallbackManager callbackManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_activity_login);
-        // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
-        populateAutoComplete();
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        // Inicializa Facebook
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        callbackManager = CallbackManager.Factory.create();
+
+        // Configuración interfaz
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.activity_activity_login);
+        context = this;
+
+        // Facebook
+        AppEventsLogger.activateApp(this);
+
+        // Preferencias
+        prefs = getSharedPreferences("MisPreferencias", Context.MODE_PRIVATE);
+
+        // Configuración del tipo de letra
+        Typeface face = Typeface.createFromAsset(getAssets(), "font/vonique_regular.otf");
+        TypefaceSpan typefaceSpan = new ArmarkTypefaceSpan(face);
+
+        SpannableString spanStrHintContrasena = new SpannableString(getString(R.string.tag_login_contrasena));
+        spanStrHintContrasena.setSpan(typefaceSpan, 0, spanStrHintContrasena.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        SpannableString spanStrHintCorreo = new SpannableString(getString(R.string.tag_login_correo));
+        spanStrHintCorreo.setSpan(typefaceSpan, 0, spanStrHintCorreo.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        SpannableString spanStrBtnEntrar = new SpannableString(getString(R.string.tag_login_entrar));
+        spanStrBtnEntrar.setSpan(typefaceSpan, 0, spanStrBtnEntrar.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        // Configuración de widgets
+        mLoginFormView = findViewById(R.id.login_form);
+        mProgressView = findViewById(R.id.login_progress);
+
+        edtLoginCorreo = (AutoCompleteTextView) findViewById(R.id.edt_login_correo);
+        edtLoginCorreo.setHint(spanStrHintCorreo);
+
+        edtLoginContrasena = (EditText) findViewById(R.id.edt_login_contrasena);
+        edtLoginContrasena.setHint(spanStrHintContrasena);
+        edtLoginContrasena.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
@@ -82,59 +135,58 @@ public class ActivityLogin extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+        Button btnLogin = (Button) findViewById(R.id.btn_login_entrar);
+        btnLogin.setText(spanStrBtnEntrar);
+        btnLogin.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+
+                    attemptLogin();
+                }
+
+        });
+
+        //  Configuración del botón de facebook
+        btnLoginFacebook = (LoginButton) findViewById(R.id.btn_login_facebook);
+        btnLoginFacebook.setReadPermissions("user_friends");
+
+        // Registro del Callback de Facebook
+        btnLoginFacebook.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                // App code
+                Log.d(TAG, "registerCallback onSuccess");
+
+                Log.i(TAG, "User ID: "
+                        + loginResult.getAccessToken().getUserId()
+                        + "\n" +
+                        "Auth Token: "
+                        + loginResult.getAccessToken().getToken());
+
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putString("user_id", loginResult.getAccessToken().getUserId().toString());
+                editor.putString("auth_token", loginResult.getAccessToken().getToken().toString());
+                editor.commit();
+
+                ingresar();
+            }
+
+            @Override
+            public void onCancel() {
+                Log.d(TAG, "registerCallback onCancel");
+            }
+
+            @Override
+            public void onError(FacebookException exception) {
+                Log.d(TAG, "registerCallback onError");
+
+                String mensaje = "Error al entrar: No se puede iniciar sesion en Facebook. Compruebe la conexión a Internet o inténtelo más tarde.";
+                Log.d(TAG, mensaje);
+                Toast.makeText(context, mensaje, Toast.LENGTH_LONG).show();
             }
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
-    }
 
-    private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
-
-        getLoaderManager().initLoader(0, null, this);
-    }
-
-    private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
     }
 
 
@@ -144,36 +196,42 @@ public class ActivityLogin extends AppCompatActivity implements LoaderCallbacks<
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
+
+        if (edtLoginContrasena != null){
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(edtLoginContrasena.getWindowToken(), 0);
+        }
+
         if (mAuthTask != null) {
             return;
         }
 
         // Reset errors.
-        mEmailView.setError(null);
-        mPasswordView.setError(null);
+        edtLoginCorreo.setError(null);
+        edtLoginContrasena.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        String correo = edtLoginCorreo.getText().toString();
+        String contrasena = edtLoginContrasena.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
+        if (!TextUtils.isEmpty(contrasena) && !isContrasenaValida(contrasena)) {
+            edtLoginContrasena.setError(getString(R.string.error_invalid_password));
+            focusView = edtLoginContrasena;
             cancel = true;
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
+        if (TextUtils.isEmpty(correo)) {
+            edtLoginCorreo.setError(getString(R.string.error_field_required));
+            focusView = edtLoginCorreo;
             cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
+        } else if (!isCorreoValido(correo)) {
+            edtLoginCorreo.setError(getString(R.string.error_invalid_email));
+            focusView = edtLoginCorreo;
             cancel = true;
         }
 
@@ -185,20 +243,51 @@ public class ActivityLogin extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(correo, contrasena);
             mAuthTask.execute((Void) null);
         }
     }
 
-    private boolean isEmailValid(String email) {
+    private boolean isCorreoValido(String correo) {
         //TODO: Replace this with your own logic
-        return email.contains("@");
+        return correo.contains("@");
     }
 
-    private boolean isPasswordValid(String password) {
+    private boolean isContrasenaValida(String contrasena) {
         //TODO: Replace this with your own logic
-        return password.length() > 4;
+        return contrasena.length() > 4;
     }
+
+    /**
+     * Llama a la actividad principal luego de haber validado las credenciales del usuario
+     */
+    private void ingresar() {
+        Intent i = new Intent(context, ActivityPrincipal.class);
+        startActivity(i);
+        finish();
+    }
+
+
+
+    private void infoUsuario() {
+        if (AccessToken.getCurrentAccessToken() != null) {
+            String token = AccessToken.getCurrentAccessToken().getToken();
+            String idUser = Profile.getCurrentProfile().getId();
+            Log.d(TAG, "idUser: " + idUser);
+            Log.d(TAG, "token: " + token);
+            Log.d(TAG, "getName: " + Profile.getCurrentProfile().getName());
+            Log.d(TAG, "getFirstName: " + Profile.getCurrentProfile().getFirstName());
+            Log.d(TAG, "getLastName: " + Profile.getCurrentProfile().getLastName());
+            Log.d(TAG, "getMiddleName: " + Profile.getCurrentProfile().getMiddleName());
+            Log.d(TAG, "getProfilePictureUri: " + Profile.getCurrentProfile().getProfilePictureUri(20, 20));
+            Log.d(TAG, "getLinkUri: " + Profile.getCurrentProfile().getLinkUri());
+
+        } else {
+            Log.d(TAG, " AccessToken es nulo ");
+        }
+    }
+
+
 
     /**
      * Shows the progress UI and hides the login form.
@@ -237,58 +326,26 @@ public class ActivityLogin extends AppCompatActivity implements LoaderCallbacks<
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
-
-                // Select only email addresses.
-                ContactsContract.Contacts.Data.MIMETYPE +
-                        " = ?", new String[]{ContactsContract.CommonDataKinds.Email
-                .CONTENT_ITEM_TYPE},
-
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
+    protected void onResume() {
+        super.onResume();
+        String userId = prefs.getString("user_id", "");
+        String authToken = prefs.getString("auth_token", "");
+        if (!userId.isEmpty() && !authToken.isEmpty()) {
+            Log.d(TAG, "UserId: " + userId);
+            Log.d(TAG, "authToken: " + authToken);
+            ingresar();
+        } else {
+            Log.d(TAG, "No se ha iniciado sesión.");
         }
-
-        addEmailsToAutoComplete(emails);
     }
+
 
     @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Facebook
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(ActivityLogin.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
-
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-        };
-
-        int ADDRESS = 0;
-        int IS_PRIMARY = 1;
-    }
 
     /**
      * Represents an asynchronous login/registration task used to authenticate
@@ -296,47 +353,133 @@ public class ActivityLogin extends AppCompatActivity implements LoaderCallbacks<
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
-        private final String mPassword;
+        private final String mCorreo;
+        private final String mContrasena;
+        private final String mUsuario;
+        private final String strItemsIniciarSesion;
+        private String mensajeError = "";
 
         UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
+
+            mUsuario = "";
+            mCorreo = email;
+            mContrasena = password;
+            strItemsIniciarSesion = getItemsIniciarSesion(mUsuario, mCorreo, mContrasena);
+            Log.d(TAG, strItemsIniciarSesion);
         }
+
+        private String getItemsIniciarSesion(String mUsuario, String mCorreo, String mContrasena) {
+            JSONObject iniciarSesion = new JSONObject();
+            JSONObject cadena = new JSONObject();
+            String resultado = "{}";
+            try {
+                cadena.put("Usuario", mUsuario);
+                cadena.put("Correo", mCorreo);
+                cadena.put("Password", mContrasena);
+                iniciarSesion.put("IniciarSesion", cadena);
+                resultado = iniciarSesion.toString();
+                Log.d("Test", "Resultado: " + resultado);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return resultado;
+        }
+
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+            boolean resultado = false;
+            return isIniciarSesion(URL_WEB_API_USUARIOS, strItemsIniciarSesion);
 
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
+        }
+
+        public boolean isIniciarSesion(String URL, String datos) {
+            boolean resultado = false;
+            String textoJson = rtaIniciarSesionWebApi(URL, datos);
+
+            if (textoJson.isEmpty()) {
                 return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+            try {
+                JSONObject jObject = new JSONObject(textoJson);
+
+                JSONObject jObjectIniciarSesion = jObject.getJSONObject("Respuesta");
+                String estado = jObjectIniciarSesion.getString("Estado");
+                Log.d(TAG, "Estado: " + estado);
+                resultado = (estado.equalsIgnoreCase("OK")) ? true : false;
+
+                if(resultado) {
+                    JSONObject jObjectUsuario = jObjectIniciarSesion.getJSONObject("Usuario");
+                    SharedPreferences.Editor editor = prefs.edit();
+
+                    String[] itemsUsuario = getResources().getStringArray(R.array.usuario_array);
+                    for (int i = 0; i < itemsUsuario.length; i++) {
+                        editor.putString(itemsUsuario[i], jObjectUsuario.getString(itemsUsuario[i]));
+                    }
+                    editor.putString("user_id",jObjectUsuario.getString("Id"));
+                    editor.putString("auth_token", "webapi");
+                    editor.commit();
                 }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
 
-            // TODO: register the new account here.
-            return true;
+
+            return resultado;
         }
+
+        public String rtaIniciarSesionWebApi(String URL, String datos) {
+
+            String resultado = "";
+            HttpClient client = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost(URL);
+
+            try {
+                StringEntity se = new StringEntity(datos);
+
+                se.setContentType("application/json;charset=UTF-8");
+                se.setContentEncoding(new BasicHeader(HTTP.CONTENT_TYPE, "application/json;charset=UTF-8"));
+                httpPost.setEntity(se);
+
+                HttpResponse httpresponse = client.execute(httpPost);
+                try {
+                    resultado = EntityUtils.toString(httpresponse.getEntity());
+                    resultado = (resultado != null) ? resultado : "";
+                    Log.i(TAG, resultado);
+
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                mensajeError = "Verifique su conexión a Internet: E0001";
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+                mensajeError = "Verifique su conexión a Internet: E0002";
+            } catch (IOException e) {
+                e.printStackTrace();
+                mensajeError = "Verifique su conexión a Internet.";
+            }
+            return resultado;
+        }
+
 
         @Override
         protected void onPostExecute(final Boolean success) {
             mAuthTask = null;
             showProgress(false);
 
+            if (!mensajeError.isEmpty()) {
+                Toast.makeText(context, mensajeError, Toast.LENGTH_LONG).show();
+                return;
+            }
+
             if (success) {
-                finish();
+                ingresar();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                Toast.makeText(context, "Correo o contraseña inválidos. Por favor vuelva a intentarlo.", Toast.LENGTH_LONG).show();
             }
         }
 
