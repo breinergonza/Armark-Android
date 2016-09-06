@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="horizontal">
+    <ImageView
+        android:id="@+id/imv_lista_productos_producto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="10dp"
+        android:layout_weight="1"
+        android:src="@android:drawable/ic_menu_gallery"
+        android:minWidth="100dp" />
+
+    <LinearLayout
+        android:id="@+id/lly_lista_productos_informacion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="3"
+        android:longClickable="true"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="10dp" >
+
+        <TextView
+            android:id="@+id/txt_lista_productos_nombre_producto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nombre producto"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/lista_promociones_nombre_textsize"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+</LinearLayout>
