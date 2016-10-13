@@ -26,6 +26,14 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import com.feedhenry.sdk.FH;
+import com.feedhenry.sdk.FHActCallback;
+import com.feedhenry.sdk.FHResponse;
+import com.feedhenry.sdk.api.FHCloudRequest;
+
+import org.json.fh.JSONArray;
+import org.json.fh.JSONObject;
+
 /**
  * Created by ElianaXimena on 11/08/2016.
  */
@@ -37,10 +45,34 @@ public class TabAlmacenes extends Fragment {
     private Context context;
     private View viewFrg;
     private ListView lvAlmacenes;
+    private ArrayList<ItemAlmacenes> datosGlobales = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        viewFrg = inflater.inflate(R.layout.tab_almacenes, container, false);
+        //viewFrg = inflater.inflate(R.layout.tab_almacenes, container, false);
+
+        viewFrg =  View.inflate(getActivity(), R.layout.tab_almacenes, null);
+
+        try{
+            Log.d(TAG, "init - fail");
+
+            FH.init(getActivity(), new FHActCallback() {
+                @Override
+                public void success(FHResponse fhResponse) {
+                    Log.d(TAG, "init - success");
+                }
+
+                @Override
+                public void fail(FHResponse fhResponse) {
+                    Log.d(TAG, "init - fail");
+                    Log.e(TAG, fhResponse.getErrorMessage(), fhResponse.getError());
+                }
+            });
+        }catch (Exception e){
+            Log.d(TAG, "init - fail : " + e.getMessage());
+        }
+
+
         context = getActivity();
         setHasOptionsMenu(true);
 
@@ -80,7 +112,62 @@ public class TabAlmacenes extends Fragment {
      * @author Eliana Ximena Gonzalez Morales 11/04/2016 16:39:57
      */
     private ArrayList<ItemAlmacenes> getDatos() {
-        ArrayList<ItemAlmacenes> datos = new ArrayList<>();
+
+        ArrayList<ItemAlmacenes> datos =  new ArrayList<>();
+
+        try {
+
+            JSONObject params = new JSONObject("{fecha: '2015-09-11' }");
+
+            FHCloudRequest request = FH.buildCloudRequest("almacenes", "POST", null, params);
+            request.executeAsync(new FHActCallback() {
+                @Override
+                public void success(FHResponse fhResponse) {
+                    Log.d(TAG, "cloudCall - success");
+                    //responseTextView.setText(fhResponse.getJson().toString());
+
+                    int Id;
+                    String RazonSocial;
+                    String Descripcion;
+                    String Direccion;
+                    String UrlImagen = "";
+                    String resp = "";
+
+                    JSONArray array = fhResponse.getArray();
+
+                    datosGlobales.clear();
+
+                    for (int i = 0; i < array.length(); i++) {
+                        JSONObject row = array.getJSONObject(i);
+                        Id = row.getInt("Id");
+                        RazonSocial = row.getString("RazonSocial");
+                        Descripcion = row.getString("Descripcion");
+                        Direccion = row.getString("Direccion");
+
+                        resp += "Id : " + Id + ", Razon Social : " + RazonSocial + "\n";
+
+                        datosGlobales.add(new ItemAlmacenes(0, RazonSocial, Descripcion,
+                                Direccion,
+                                "http://armark.cloudapp.net/Web/Storage/Almacenes/1.png",  false) );
+                    }
+                }
+
+                @Override
+                public void fail(FHResponse fhResponse) {
+                    Log.d(TAG, "cloudCall - fail");
+                    Log.e(TAG, fhResponse.getErrorMessage(), fhResponse.getError());
+
+                }
+
+            });
+
+            Thread.sleep(1000);
+
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage(), e.getCause());
+        }
+
+        datos = datosGlobales;
 
 /*        datos.add(new ItemAlmacenes(id, nombrePromocion, descripcion1, descripcion2,
                 rutaImagenProducto,  promocion) );*/
@@ -110,8 +197,6 @@ public class TabAlmacenes extends Fragment {
         // Do something that differs the Activity's menu here
         super.onCreateOptionsMenu(menu, inflater);
     }*/
-
-
 
 
     /**

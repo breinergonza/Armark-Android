@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,22 +40,43 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
+//import org.apache.http.HttpResponse;
+//import org.apache.http.ParseException;
+//import org.apache.http.client.ClientProtocolException;
+//import org.apache.http.client.HttpClient;
+//import org.apache.http.client.methods.HttpPost;
+//import org.apache.http.entity.StringEntity;
+//import org.apache.http.impl.client.DefaultHttpClient;
+//import org.apache.http.message.BasicHeader;
+//import org.apache.http.protocol.HTTP;
+//import org.apache.http.util.EntityUtils;
+//import org.json.JSONException;
+//import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 
+import com.feedhenry.sdk.FH;
+import com.feedhenry.sdk.FHActCallback;
+import com.feedhenry.sdk.FHResponse;
+import com.feedhenry.sdk.api.FHCloudRequest;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
+
+import org.json.fh.JSONException;
+import org.json.fh.JSONObject;
+
+import cz.msebera.android.httpclient.HttpResponse;
+import cz.msebera.android.httpclient.client.HttpClient;
+import cz.msebera.android.httpclient.client.methods.HttpPost;
+import cz.msebera.android.httpclient.entity.StringEntity;
+import cz.msebera.android.httpclient.impl.client.DefaultHttpClient;
+import cz.msebera.android.httpclient.message.BasicHeader;
+import cz.msebera.android.httpclient.protocol.HTTP;
+import cz.msebera.android.httpclient.util.EntityUtils;
 
 /**
  * A login screen that offers login via email/password.
@@ -82,6 +104,11 @@ public class ActivityLogin extends AppCompatActivity {
     // Facebook
     private LoginButton btnLoginFacebook;
     private CallbackManager callbackManager;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,8 +168,8 @@ public class ActivityLogin extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                    attemptLogin();
-                }
+                attemptLogin();
+            }
 
         });
 
@@ -187,6 +214,9 @@ public class ActivityLogin extends AppCompatActivity {
         });
 
 
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
 
@@ -197,7 +227,7 @@ public class ActivityLogin extends AppCompatActivity {
      */
     private void attemptLogin() {
 
-        if (edtLoginContrasena != null){
+        if (edtLoginContrasena != null) {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(edtLoginContrasena.getWindowToken(), 0);
         }
@@ -268,7 +298,6 @@ public class ActivityLogin extends AppCompatActivity {
     }
 
 
-
     private void infoUsuario() {
         if (AccessToken.getCurrentAccessToken() != null) {
             String token = AccessToken.getCurrentAccessToken().getToken();
@@ -286,7 +315,6 @@ public class ActivityLogin extends AppCompatActivity {
             Log.d(TAG, " AccessToken es nulo ");
         }
     }
-
 
 
     /**
@@ -344,6 +372,42 @@ public class ActivityLogin extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Facebook
         callbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("ActivityLogin Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
     }
 
 
@@ -409,7 +473,7 @@ public class ActivityLogin extends AppCompatActivity {
                 Log.d(TAG, "Estado: " + estado);
                 resultado = (estado.equalsIgnoreCase("OK")) ? true : false;
 
-                if(resultado) {
+                if (resultado) {
                     JSONObject jObjectUsuario = jObjectIniciarSesion.getJSONObject("Usuario");
                     SharedPreferences.Editor editor = prefs.edit();
 
@@ -417,7 +481,7 @@ public class ActivityLogin extends AppCompatActivity {
                     for (int i = 0; i < itemsUsuario.length; i++) {
                         editor.putString(itemsUsuario[i], jObjectUsuario.getString(itemsUsuario[i]));
                     }
-                    editor.putString("user_id",jObjectUsuario.getString("Id"));
+                    editor.putString("user_id", jObjectUsuario.getString("Id"));
                     editor.putString("auth_token", "webapi");
                     editor.commit();
                 }
@@ -448,16 +512,13 @@ public class ActivityLogin extends AppCompatActivity {
                     resultado = (resultado != null) ? resultado : "";
                     Log.i(TAG, resultado);
 
-                } catch (ParseException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
                 mensajeError = "Verifique su conexión a Internet: E0001";
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-                mensajeError = "Verifique su conexión a Internet: E0002";
             } catch (IOException e) {
                 e.printStackTrace();
                 mensajeError = "Verifique su conexión a Internet.";

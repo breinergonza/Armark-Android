@@ -1,8 +1,12 @@
+plugins {
+    id "com.github.hierynomus.license" version "0.12.0"
+}
+
 apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "24.0.0"
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "com.didelab.armk.armarkandroid"
@@ -10,6 +14,9 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testApplicationId "com.feedhenry.helloworld.test"
+        multiDexEnabled true
     }
 
 
@@ -19,16 +26,47 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    packagingOptions {
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    jacoco {
+        version = '0.7.5.201505241946'
+    }
+
+}
+
+license {
+    header rootProject.file('misc/HEADER')
+    strictCheck true
+}
+
+configurations.all {
+    resolutionStrategy {
+        force 'com.android.support:support-annotations:23.1.1'
+    }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
+    //compile fileTree(include: ['*.jar'], dir: 'libs')
+    //testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'
-    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+    //compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+    compile 'com.facebook.android:facebook-android-sdk:4.15.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
+    //compile 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
+    compile 'com.feedhenry:fh-android-sdk:3.1.0'
+    compile 'com.android.support:multidex:1.0.0'
+    compile 'junit:junit:4.12'
+    compile 'org.apache.httpcomponents:httpclient:4.5.2'
+    compile 'com.google.android.gms:play-services-appindexing:8.4.0'
 }
 
 repositories {
